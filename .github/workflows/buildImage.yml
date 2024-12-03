@@ -6,6 +6,14 @@ on:
       tag:
         description: Image tag
         required: true
+      version:
+        description: Full or Slim version
+        type: choice
+        options:
+          - 'Dockerfile'
+          - 'Dockerfile.slim'
+        required: true
+        default: 'Dockerfile.slim'
 
 jobs:
 
@@ -48,7 +56,7 @@ jobs:
         run: python -m pip install --upgrade huggingface_hub nltk
             
       - name: Download dependency
-        run: python download_deps.py
+        run: python ./customize/download_deps.py
 
       - name: 'Login ACR'
         uses: azure/docker-login@v2
@@ -59,5 +67,5 @@ jobs:
 
       - name: Build and push image to Azure ACR
         run: |
-          docker build . --file ./customize/Dockerfile --tag acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
+          docker build . --file ./customize/${{ inputs.version }} --tag acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
           docker push acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}

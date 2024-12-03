@@ -1,0 +1,43 @@
+name: Build container image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Image tag
+        required: true
+
+jobs:
+
+  build:
+    runs-on: Ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: update yaml file with env variables
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '#{'
+          tokenSuffix: '}#'
+          files: '["./customize/web/src/pages/login/index.tsx"]'
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          HOST: ${{ secrets.HOST }}
+
+      - name: Download dependency
+        run: ./download_deps.sh
+
+      - name: 'Login ACR'
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USER }}
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Build and push image to Azure ACR
+        run: |
+          docker build . --file ./customize/Dockerfile --tag acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
+          docker push acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}

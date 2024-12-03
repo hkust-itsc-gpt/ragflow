@@ -56,7 +56,12 @@ jobs:
         run: python -m pip install --upgrade huggingface_hub nltk
             
       - name: Download dependency
-        run: python ./customize/download_deps.py
+        run: |
+          if [ ${{ inputs.version }} == "Dockerfile" ]; then
+            python ./download_deps.py
+          elif [ ${{ inputs.version }} == "Dockerfile.slim" ]; then
+            python ./customize/download_deps.py
+          fi
 
       - name: 'Login ACR'
         uses: azure/docker-login@v2

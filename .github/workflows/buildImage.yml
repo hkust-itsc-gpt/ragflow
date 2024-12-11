@@ -72,11 +72,12 @@ jobs:
 
       - name: Build and push image to Azure ACR
         run: |
+          docker build --file Dockerfile.deps --tag ragflow_deps:latest
           if [ ${{ inputs.version }} == "0" ]; then
             docker build --file ./customize/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ inputs.tag }} .
-            docker push acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
+            docker push acraksys64gn2f5izuw.azurecr.io/aksapp/ragflow:${{ inputs.tag }}
           elif [ ${{ inputs.version }} == "1" ]; then
             docker build --build-arg LIGHTEN=1 --file ./customize/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:slim_${{ inputs.tag }} .
-            docker push acraksys64gn2f5izuw.azurecr.io/ragflow:slim_${{ inputs.tag }}
+            docker push acraksys64gn2f5izuw.azurecr.io/aksapp/ragflow:slim_${{ inputs.tag }}
           fi
           

@@ -86,7 +86,7 @@ export default {
       namePlaceholder: 'Please input name!',
       doc: 'Docs',
       datasetDescription:
-        '😉 Questions and answers can only be answered after the parsing is successful.',
+        '😉 Please wait for your file to finish parsing before starting an AI-powered chat.',
       addFile: 'Add file',
       searchFiles: 'Search your files',
       localFiles: 'Local files',
@@ -99,9 +99,9 @@ export default {
       disabled: 'Disable',
       action: 'Action',
       parsingStatus: 'Parsing Status',
-      processBeginAt: 'Process Begin At',
-      processDuration: 'Process Duration',
-      progressMsg: 'Progress Msg',
+      processBeginAt: 'Begin at',
+      processDuration: 'Duration',
+      progressMsg: 'Progress',
       testingDescription:
         'Conduct a retrieval test to check if RAGFlow can recover the intended content for the LLM.',
       similarityThreshold: 'Similarity threshold',
@@ -151,24 +151,24 @@ export default {
       chunk: 'Chunk',
       bulk: 'Bulk',
       cancel: 'Cancel',
-      rerankModel: 'Rerank Model',
+      rerankModel: 'Rerank model',
       rerankPlaceholder: 'Please select',
       rerankTip: `If left empty, RAGFlow will use a combination of weighted keyword similarity and weighted vector cosine similarity; if a rerank model is selected, a weighted reranking score will replace the weighted vector cosine similarity.`,
       topK: 'Top-K',
       topKTip: `K chunks will be fed into rerank models.`,
       delimiter: `Delimiter`,
       delimiterTip:
-        'Supports multiple characters as separators, and the multiple character separators are wrapped with `. For example, if it is configured like this: \n`##`; then the text will be separated by line breaks, two #s and a semicolon, and then assembled according to the size of the "token number".',
+        'A delimiter or separator can consist of one or multiple special characters. If it is multiple characters, ensure they are enclosed in backticks( ``). For example, if you configure your delimiters like this: \n`##`;, then your texts will be separated at line breaks, double hash symbols (##), or semicolons.',
       html4excel: 'Excel to HTML',
-      html4excelTip: `When enabled, the spreadsheet will be parsed into HTML tables; otherwise, it will be parsed into key-value pairs by row.`,
+      html4excelTip: `When enabled, the spreadsheet will be parsed into HTML tables, and at most 256 rows for one table. Otherwise, it will be parsed into key-value pairs by row.`,
       autoKeywords: 'Auto-keyword',
-      autoKeywordsTip: `Extract N keywords for each chunk to increase their ranking for queries containing those keywords. You can check or update the added keywords for a chunk from the chunk list. Be aware that extra tokens will be consumed by the LLM specified in 'System model settings'.`,
+      autoKeywordsTip: `Automatically extract N keywords for each chunk to increase their ranking for queries containing those keywords. You can check or update the added keywords for a chunk from the chunk list. Be aware that extra tokens will be consumed by the LLM specified in 'System model settings'.`,
       autoQuestions: 'Auto-question',
-      autoQuestionsTip: `Extract N questions for each chunk to increase their ranking for queries containing those questions. You can check or update the added questions for a chunk from the chunk list. This feature will not disrupt the chunking process if an error occurs, except that it may add an empty result to the original chunk. Be aware that extra tokens will be consumed by the LLM specified in 'System model settings'.`,
+      autoQuestionsTip: `Automatically extract N questions for each chunk to increase their ranking for queries containing those questions. You can check or update the added questions for a chunk from the chunk list. This feature will not disrupt the chunking process if an error occurs, except that it may add an empty result to the original chunk. Be aware that extra tokens will be consumed by the LLM specified in 'System model settings'.`,
     },
     knowledgeConfiguration: {
       titleDescription:
-        'Update your knowledge base configurations here, particularly the chunk method.',
+        'Update your knowledge base configuration here, particularly the chunk method.',
       name: 'Knowledge base name',
       photo: 'Knowledge base photo',
       description: 'Description',
@@ -180,13 +180,13 @@ export default {
       chunkTokenNumber: 'Chunk token number',
       chunkTokenNumberMessage: 'Chunk token number is required',
       embeddingModelTip:
-        'The model that converts chunks into embeddings. It cannot be changed once the knowledge base has chunks. To switch to a different embedding model, You must delete all chunks in the knowledge base.',
+        'The model that converts chunks into embeddings. It cannot be changed once the knowledge base has chunks. To switch to a different embedding model, you must delete all existing chunks in the knowledge base.',
       permissionsTip:
         "If set to 'Team', all team members will be able to manage the knowledge base.",
       chunkTokenNumberTip:
         'It sets the token threshold for a chunk. A paragraph with fewer tokens than this threshold will be combined with the following paragraph until the token count exceeds the threshold, at which point a chunk is created.',
       chunkMethod: 'Chunk method',
-      chunkMethodTip: 'Tips are on the right.',
+      chunkMethodTip: 'View the tips on the right.',
       upload: 'Upload',
       english: 'English',
       chinese: 'Chinese',
@@ -279,12 +279,12 @@ export default {
     </p>`,
       knowledgeGraph: `<p>Supported file formats are <b>DOCX, EXCEL, PPT, IMAGE, PDF, TXT, MD, JSON, EML</b>
 
-<p>This approach chunks files using the 'naive'/'General' method. It splits a document into segements and then combines adjacent segments until the token count exceeds the threshold specified by 'Chunk token number', at which point a chunk is created.</p>
+<p>This approach chunks files using the 'naive'/'General' method. It splits a document into segments and then combines adjacent segments until the token count exceeds the threshold specified by 'Chunk token number', at which point a chunk is created.</p>
 <p>The chunks are then fed to the LLM to extract entities and relationships for a knowledge graph and a mind map.</p>
 <p>Ensure that you set the <b>Entity types</b>.</p>`,
       useRaptor: 'Use RAPTOR to enhance retrieval',
       useRaptorTip:
-        'Recursive Abstractive Processing for Tree-Organized Retrieval, see https://huggingface.co/papers/2401.18059 for more information',
+        'Recursive Abstractive Processing for Tree-Organized Retrieval, see https://huggingface.co/papers/2401.18059 for more information.',
       prompt: 'Prompt',
       promptTip: 'LLM prompt used for summarization.',
       promptMessage: 'Prompt is required',
@@ -303,9 +303,9 @@ The above is the content you need to summarize.`,
       randomSeed: 'Random seed',
       randomSeedMessage: 'Random seed is required',
       entityTypes: 'Entity types',
+      vietnamese: 'Vietamese',
       pageRank: 'Page rank',
-      pageRankTip: `This is used to boost the relevance score. The relevance score with all the retrieved chunks will plus this number.
-When you want to search the given knowledge base at first place, set a higher pagerank score than others.`,
+      pageRankTip: `This increases the relevance score of the knowledge base. Its value will be added to the relevance score of all retrieved chunks from this knowledge base. Useful when you are searching within multiple knowledge bases and wanting to assign a higher pagerank score to a specific one.`,
     },
     chunk: {
       chunk: 'Chunk',
@@ -325,6 +325,8 @@ When you want to search the given knowledge base at first place, set a higher pa
       ellipse: 'Ellipse',
       graph: 'Knowledge graph',
       mind: 'Mind map',
+      question: 'Question',
+      questionTip: `If there're given questions, the embedding of the chunk will be based on them.`,
     },
     chat: {
       newConversation: 'New conversation',
@@ -335,7 +337,7 @@ When you want to search the given knowledge base at first place, set a higher pa
       chat: 'Chat',
       newChat: 'New chat',
       send: 'Send',
-      sendPlaceholder: 'Message the Assistant...',
+      sendPlaceholder: 'Message the assistant...',
       chatConfiguration: 'Chat Configuration',
       chatConfigurationDescription:
         ' Here, dress up a dedicated assistant for your special knowledge bases! 💕',
@@ -349,7 +351,7 @@ When you want to search the given knowledge base at first place, set a higher pa
       setAnOpener: 'Set an opener',
       setAnOpenerInitial: `Hi! I'm your assistant, what can I do for you?`,
       setAnOpenerTip: 'How do you want to welcome your clients?',
-      knowledgeBases: 'Knowledgebases',
+      knowledgeBases: 'Knowledge bases',
       knowledgeBasesMessage: 'Please select',
       knowledgeBasesTip: 'Select knowledgebases associated.',
       system: 'System',
@@ -387,21 +389,21 @@ When you want to search the given knowledge base at first place, set a higher pa
       topPMessage: 'Top P is required',
       topPTip:
         'Also known as “nucleus sampling,” this parameter sets a threshold to select a smaller set of words to sample from. It focuses on the most likely words, cutting off the less probable ones.',
-      presencePenalty: 'Presence Penalty',
-      presencePenaltyMessage: 'Presence Penalty is required',
+      presencePenalty: 'Presence penalty',
+      presencePenaltyMessage: 'Presence penalty is required',
       presencePenaltyTip:
         'This discourages the model from repeating the same information by penalizing words that have already appeared in the conversation.',
-      frequencyPenalty: 'Frequency Penalty',
-      frequencyPenaltyMessage: 'Frequency Penalty is required',
+      frequencyPenalty: 'Frequency penalty',
+      frequencyPenaltyMessage: 'Frequency penalty is required',
       frequencyPenaltyTip:
         'Similar to the presence penalty, this reduces the model’s tendency to repeat the same words frequently.',
-      maxTokens: 'Max Tokens',
-      maxTokensMessage: 'Max Tokens is required',
+      maxTokens: 'Max tokens',
+      maxTokensMessage: 'Max tokens is required',
       maxTokensTip:
         'This sets the maximum length of the model’s output, measured in the number of tokens (words or pieces of words).',
       maxTokensInvalidMessage: 'Please enter a valid number for Max Tokens.',
       maxTokensMinMessage: 'Max Tokens cannot be less than 0.',
-      quote: 'Show Quote',
+      quote: 'Show quote',
       quoteTip: 'Should the source of the original text be displayed?',
       selfRag: 'Self-RAG',
       selfRagTip: 'Please refer to: https://huggingface.co/papers/2310.11511',
@@ -430,6 +432,7 @@ When you want to search the given knowledge base at first place, set a higher pa
       partialTitle: 'Partial Embed',
       extensionTitle: 'Chrome Extension',
       tokenError: 'Please create API Token first!',
+      betaError: 'The beta field of the API Token cannot be empty!',
       searching: 'searching...',
       parsing: 'Parsing',
       uploading: 'Uploading',
@@ -459,7 +462,7 @@ When you want to search the given knowledge base at first place, set a higher pa
       password: 'Password',
       passwordDescription:
         'Please enter your current password to change your password.',
-      model: 'Model Providers',
+      model: 'Model providers',
       modelDescription: 'Set the model parameter and API KEY here.',
       team: 'Team',
       system: 'System',
@@ -474,7 +477,7 @@ When you want to search the given knowledge base at first place, set a higher pa
       colorSchemaPlaceholder: 'select your color schema',
       bright: 'Bright',
       dark: 'Dark',
-      timezone: 'Timezone',
+      timezone: 'Time zone',
       timezoneMessage: 'Please input your timezone!',
       timezonePlaceholder: 'select your timezone',
       email: 'Email address',
@@ -516,7 +519,7 @@ When you want to search the given knowledge base at first place, set a higher pa
       sequence2txtModel: 'Sequence2txt model',
       sequence2txtModelTip:
         'The default ASR model all the newly created knowledgebase will use. Use this model to translate voices to corresponding text.',
-      rerankModel: 'Rerank Model',
+      rerankModel: 'Rerank model',
       rerankModelTip: `The default rerank model is used to rerank chunks retrieved by users' questions.`,
       ttsModel: 'TTS Model',
       ttsModelTip:
@@ -1075,6 +1078,8 @@ When you want to search the given knowledge base at first place, set a higher pa
       ccEmailTip: 'cc_email: CC email (Optional)',
       subjectTip: 'subject: Email subject (Optional)',
       contentTip: 'content: Email content (Optional)',
+      jsonUploadTypeErrorMessage: 'Please upload json file',
+      jsonUploadContentErrorMessage: 'json file error',
     },
     footer: {
       profile: 'All rights reserved @ React',

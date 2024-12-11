@@ -101,7 +101,7 @@ export default {
       processBeginAt: '流程開始於',
       processDuration: '過程持續時間',
       progressMsg: '進度消息',
-      testingDescription: '最後一步！成功後，剩下的就交給Infiniflow AI吧。',
+      testingDescription: '最後一步！成功後，剩下的就交給 RAGFlow 吧。',
       similarityThreshold: '相似度閾值',
       similarityThresholdTip:
         '我們使用混合相似度得分來評估兩行文本之間的距離。它是加權關鍵詞相似度和向量餘弦相似度。如果查詢和塊之間的相似度小於此閾值，則該塊將被過濾掉。',
@@ -156,7 +156,7 @@ export default {
       delimiterTip:
         '支援多字元作為分隔符，多字元分隔符用`包裹。如配置成這樣：\n`##`;那麼就會用換行，兩個#以及分號先對文字進行分割，然後按照「 token number」大小進行拼裝。',
       html4excel: '表格轉HTML',
-      html4excelTip: `Excel 是否會被解析為 HTML 表格。如果為 FALSE，Excel 中的每一行都會形成一個區塊。`,
+      html4excelTip: `啟用後，電子表格將解析為 HTML 表格，一張表格最多 256 行。否則，會按行解析成鍵值對。`,
       autoKeywords: '自動關鍵字',
       autoKeywordsTip: `在查詢此類關鍵字時，為每個區塊提取 N 個關鍵字以提高其排名分數。在「系統模型設定」中設定的 LLM 將消耗額外的 token。您可以在區塊清單中查看結果。 `,
       autoQuestions: '自動問題',
@@ -309,6 +309,8 @@ export default {
       ellipse: '省略',
       graph: '知識圖譜',
       mind: '心智圖',
+      question: '問題',
+      questionTip: `如果存在給定的問題，則區塊的嵌入將基於它們。`,
     },
     chat: {
       newConversation: '新會話',
@@ -412,6 +414,7 @@ export default {
       partialTitle: '部分嵌入',
       extensionTitle: 'Chrome 插件',
       tokenError: '請先創建 API Token!',
+      betaError: 'API Token的beta欄位不可以為空！',
       searching: '搜索中',
       parsing: '解析中',
       uploading: '上傳中',
@@ -426,6 +429,7 @@ export default {
       multiTurnTip:
         '在多輪對話的中，對去知識庫查詢的問題進行最佳化。會呼叫大模型額外消耗token。',
       howUseId: '如何使用聊天ID？',
+      description: '助理描述',
     },
     setting: {
       profile: '概述',
@@ -1008,6 +1012,8 @@ export default {
       testRun: '試運行',
       template: '模板轉換',
       templateDescription: '此元件用於排版各種元件的輸出。 ',
+      jsonUploadTypeErrorMessage: '請上傳json檔',
+      jsonUploadContentErrorMessage: 'json 檔案錯誤',
     },
     footer: {
       profile: '“保留所有權利 @ react”',

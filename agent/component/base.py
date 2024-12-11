@@ -425,7 +425,8 @@ class ComponentBase(ABC):
     def output(self, allow_partial=True) -> Tuple[str, Union[pd.DataFrame, partial]]:
         o = getattr(self._param, self._param.output_var_name)
         if not isinstance(o, partial) and not isinstance(o, pd.DataFrame):
-            if not isinstance(o, list): o = [o]
+            if not isinstance(o, list):
+                o = [o]
             o = pd.DataFrame(o)
 
         if allow_partial or not isinstance(o, partial):
@@ -437,7 +438,8 @@ class ComponentBase(ABC):
         for oo in o():
             if not isinstance(oo, pd.DataFrame):
                 outs = pd.DataFrame(oo if isinstance(oo, list) else [oo])
-            else: outs = oo
+            else:
+                outs = oo
         return self._param.output_var_name, outs
 
     def reset(self):
@@ -457,7 +459,7 @@ class ComponentBase(ABC):
             self._param.inputs = []
             outs = []
             for q in self._param.query:
-                if q["component_id"]:
+                if q.get("component_id"):
                     if q["component_id"].split("@")[0].lower().find("begin") >= 0:
                         cpn_id, key = q["component_id"].split("@")
                         for p in self._canvas.get_component(cpn_id)["obj"]._param.query:
@@ -474,18 +476,20 @@ class ComponentBase(ABC):
                     self._param.inputs.append({"component_id": q["component_id"],
                                                "content": "\n".join(
                                                    [str(d["content"]) for d in outs[-1].to_dict('records')])})
-                elif q["value"]:
+                elif q.get("value"):
                     self._param.inputs.append({"component_id": None, "content": q["value"]})
                     outs.append(pd.DataFrame([{"content": q["value"]}]))
             if outs:
                 df = pd.concat(outs, ignore_index=True)
-                if "content" in df: df = df.drop_duplicates(subset=['content']).reset_index(drop=True)
+                if "content" in df:
+                    df = df.drop_duplicates(subset=['content']).reset_index(drop=True)
                 return df
 
         upstream_outs = []
 
         for u in reversed_cpnts[::-1]:
-            if self.get_component_name(u) in ["switch", "concentrator"]: continue
+            if self.get_component_name(u) in ["switch", "concentrator"]:
+                continue
             if self.component_name.lower() == "generate" and self.get_component_name(u) == "retrieval":
                 o = self._canvas.get_component(u)["obj"].output(allow_partial=False)[1]
                 if o is not None:
@@ -522,6 +526,21 @@ class ComponentBase(ABC):
 
         return df
 
+    def get_input_elements(self):
+        assert self._param.query, "Please identify input parameters firstly."
+        eles = []
+        for q in self._param.query:
+            if q.get("component_id"):
+                if q["component_id"].split("@")[0].lower().find("begin") >= 0:
+                    cpn_id, key = q["component_id"].split("@")
+                    eles.extend(self._canvas.get_component(cpn_id)["obj"]._param.query)
+                    continue
+
+                eles.append({"key": q["key"], "component_id": q["component_id"]})
+            else:
+                eles.append({"key": q["key"]})
+        return eles
+
     def get_stream_input(self):
         reversed_cpnts = []
         if len(self._canvas.path) > 1:
@@ -529,7 +548,8 @@ class ComponentBase(ABC):
         reversed_cpnts.extend(self._canvas.path[-1])
 
         for u in reversed_cpnts[::-1]:
-            if self.get_component_name(u) in ["switch", "answer"]: continue
+            if self.get_component_name(u) in ["switch", "answer"]:
+                continue
             return self._canvas.get_component(u)["obj"].output()[1]
 
     @staticmethod

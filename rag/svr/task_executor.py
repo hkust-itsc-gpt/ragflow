@@ -17,24 +17,19 @@
 # from beartype.claw import beartype_all  # <-- you didn't sign up for this
 # beartype_all(conf=BeartypeConf(violation_type=UserWarning))    # <-- emit warnings from all code
 
-import logging
 import sys
-import os
-
 from api.utils.log_utils import initRootLogger
-
 CONSUMER_NO = "0" if len(sys.argv) < 2 else sys.argv[1]
 CONSUMER_NAME = "task_executor_" + CONSUMER_NO
-LOG_LEVELS = os.environ.get("LOG_LEVELS", "")
-initRootLogger(CONSUMER_NAME, LOG_LEVELS)
+initRootLogger(CONSUMER_NAME)
 
+import logging
+import os
 from datetime import datetime
 import json
-import os
 import hashlib
 import copy
 import re
-import sys
 import time
 import threading
 from functools import partial
@@ -201,7 +196,8 @@ def build_chunks(task, progress_callback):
         "doc_id": task["doc_id"],
         "kb_id": str(task["kb_id"])
     }
-    if task["pagerank"]: doc["pagerank_fea"] = int(task["pagerank"])
+    if task["pagerank"]:
+        doc["pagerank_fea"] = int(task["pagerank"])
     el = 0
     for ck in cks:
         d = copy.deepcopy(doc)
@@ -215,9 +211,9 @@ def build_chunks(task, progress_callback):
         if not d.get("image"):
             _ = d.pop("image", None)
             d["img_id"] = ""
-            d["page_num_list"] = json.dumps([])
-            d["position_list"] = json.dumps([])
-            d["top_list"] = json.dumps([])
+            d["page_num_int"] = []
+            d["position_int"] = []
+            d["top_int"] = []
             docs.append(d)
             continue
 
@@ -255,13 +251,8 @@ def build_chunks(task, progress_callback):
         progress_callback(msg="Start to generate questions for every chunk ...")
         chat_mdl = LLMBundle(task["tenant_id"], LLMType.CHAT, llm_name=task["llm_id"], lang=task["language"])
         for d in docs:
-            qst = question_proposal(chat_mdl, d["content_with_weight"], task["parser_config"]["auto_questions"])
-            d["content_with_weight"] = f"Question: \n{qst}\n\nAnswer:\n" + d["content_with_weight"]
-            qst = rag_tokenizer.tokenize(qst)
-            if "content_ltks" in d:
-                d["content_ltks"] += " " + qst
-            if "content_sm_ltks" in d:
-                d["content_sm_ltks"] += " " + rag_tokenizer.fine_grained_tokenize(qst)
+            d["question_kwd"] = question_proposal(chat_mdl, d["content_with_weight"], task["parser_config"]["auto_questions"]).split("\n")
+            d["question_tks"] = rag_tokenizer.tokenize("\n".join(d["question_kwd"]))
         progress_callback(msg="Question generation completed in {:.2f}s".format(timer() - st))
 
     return docs
@@ -269,15 +260,22 @@ def build_chunks(task, progress_callback):
 
 def init_kb(row, vector_size: int):
     idxnm = search.index_name(row["tenant_id"])
-    return settings.docStoreConn.createIdx(idxnm, row["kb_id"], vector_size)
+    return settings.docStoreConn.createIdx(idxnm, row.get("kb_id",""), vector_size)
 
 
 def embedding(docs, mdl, parser_config=None, callback=None):
     if parser_config is None:
         parser_config = {}
-    batch_size = 32
-    tts, cnts = [rmSpace(d["title_tks"]) for d in docs if d.get("title_tks")], [
-        re.sub(r"</?(table|td|caption|tr|th)( [^<>]{0,12})?>", " ", d["content_with_weight"]) for d in docs]
+    batch_size = 16
+    tts, cnts = [], []
+    for d in docs:
+        tts.append(rmSpace(d.get("docnm_kwd", "Title")))
+        c = "\n".join(d.get("question_kwd", []))
+        if not c:
+            c = d["content_with_weight"]
+        c = re.sub(r"</?(table|td|caption|tr|th)( [^<>]{0,12})?>", " ", c)
+        cnts.append(c)
+
     tk_count = 0
     if len(tts) == len(cnts):
         tts_ = np.array([])
@@ -340,7 +338,8 @@ def run_raptor(row, chat_mdl, embd_mdl, callback=None):
         "docnm_kwd": row["name"],
         "title_tks": rag_tokenizer.tokenize(row["name"])
     }
-    if row["pagerank"]: doc["pagerank_fea"] = int(row["pagerank"])
+    if row["pagerank"]:
+        doc["pagerank_fea"] = int(row["pagerank"])
     res = []
     tk_count = 0
     for content, vctr in chunks[original_length:]:

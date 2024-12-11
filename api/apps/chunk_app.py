@@ -35,7 +35,7 @@ import hashlib
 import re
 
 
-@manager.route('/list', methods=['POST'])
+@manager.route('/list', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("doc_id")
 def list_chunk():
@@ -60,11 +60,6 @@ def list_chunk():
         sres = settings.retrievaler.search(query, search.index_name(tenant_id), kb_ids, highlight=True)
         res = {"total": sres.total, "chunks": [], "doc": doc.to_dict()}
         for id in sres.ids:
-            chunk_elem = sres.field[id]
-            if 'position_list' in chunk_elem:
-                if isinstance(chunk_elem["position_list"], str):
-                    chunk_elem.pop('position_list') # Infinity will store position list as empty str
-
             d = {
                 "chunk_id": id,
                 "content_with_weight": rmSpace(sres.highlight[id]) if question and id in sres.highlight else sres.field[
@@ -73,9 +68,10 @@ def list_chunk():
                 "doc_id": sres.field[id]["doc_id"],
                 "docnm_kwd": sres.field[id]["docnm_kwd"],
                 "important_kwd": sres.field[id].get("important_kwd", []),
+                "question_kwd": sres.field[id].get("question_kwd", []),
                 "image_id": sres.field[id].get("img_id", ""),
-                "available_int": sres.field[id].get("available_int", 1),
-                "positions": json.loads(sres.field[id].get("position_list", "[]")),
+                "available_int": int(sres.field[id].get("available_int", 1)),
+                "positions": sres.field[id].get("position_int", []),
             }
             assert isinstance(d["positions"], list)
             assert len(d["positions"]) == 0 or (isinstance(d["positions"][0], list) and len(d["positions"][0]) == 5)
@@ -88,7 +84,7 @@ def list_chunk():
         return server_error_response(e)
 
 
-@manager.route('/get', methods=['GET'])
+@manager.route('/get', methods=['GET'])  # noqa: F821
 @login_required
 def get():
     chunk_id = request.args["chunk_id"]
@@ -117,10 +113,10 @@ def get():
         return server_error_response(e)
 
 
-@manager.route('/set', methods=['POST'])
+@manager.route('/set', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("doc_id", "chunk_id", "content_with_weight",
-                  "important_kwd")
+                  "important_kwd", "question_kwd")
 def set():
     req = request.json
     d = {
@@ -130,6 +126,8 @@ def set():
     d["content_sm_ltks"] = rag_tokenizer.fine_grained_tokenize(d["content_ltks"])
     d["important_kwd"] = req["important_kwd"]
     d["important_tks"] = rag_tokenizer.tokenize(" ".join(req["important_kwd"]))
+    d["question_kwd"] = req["question_kwd"]
+    d["question_tks"] = rag_tokenizer.tokenize("\n".join(req["question_kwd"]))
     if "available_int" in req:
         d["available_int"] = req["available_int"]
 
@@ -157,7 +155,7 @@ def set():
             d = beAdoc(d, arr[0], arr[1], not any(
                 [rag_tokenizer.is_chinese(t) for t in q + a]))
 
-        v, c = embd_mdl.encode([doc.name, req["content_with_weight"]])
+        v, c = embd_mdl.encode([doc.name, req["content_with_weight"] if not d["question_kwd"] else "\n".join(d["question_kwd"])])
         v = 0.1 * v[0] + 0.9 * v[1] if doc.parser_id != ParserType.QA else v[1]
         d["q_%d_vec" % len(v)] = v.tolist()
         settings.docStoreConn.update({"id": req["chunk_id"]}, d, search.index_name(tenant_id), doc.kb_id)
@@ -166,7 +164,7 @@ def set():
         return server_error_response(e)
 
 
-@manager.route('/switch', methods=['POST'])
+@manager.route('/switch', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("chunk_ids", "available_int", "doc_id")
 def switch():
@@ -186,7 +184,7 @@ def switch():
         return server_error_response(e)
 
 
-@manager.route('/rm', methods=['POST'])
+@manager.route('/rm', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("chunk_ids", "doc_id")
 def rm():
@@ -205,7 +203,7 @@ def rm():
         return server_error_response(e)
 
 
-@manager.route('/create', methods=['POST'])
+@manager.route('/create', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("doc_id", "content_with_weight")
 def create():
@@ -218,6 +216,8 @@ def create():
     d["content_sm_ltks"] = rag_tokenizer.fine_grained_tokenize(d["content_ltks"])
     d["important_kwd"] = req.get("important_kwd", [])
     d["important_tks"] = rag_tokenizer.tokenize(" ".join(req.get("important_kwd", [])))
+    d["question_kwd"] = req.get("question_kwd", [])
+    d["question_tks"] = rag_tokenizer.tokenize("\n".join(req.get("question_kwd", [])))
     d["create_time"] = str(datetime.datetime.now()).replace("T", " ")[:19]
     d["create_timestamp_flt"] = datetime.datetime.now().timestamp()
 
@@ -237,12 +237,13 @@ def create():
         e, kb = KnowledgebaseService.get_by_id(doc.kb_id)
         if not e:
             return get_data_error_result(message="Knowledgebase not found!")
-        if kb.pagerank: d["pagerank_fea"] = kb.pagerank
+        if kb.pagerank:
+            d["pagerank_fea"] = kb.pagerank
 
         embd_id = DocumentService.get_embd_id(req["doc_id"])
         embd_mdl = LLMBundle(tenant_id, LLMType.EMBEDDING.value, embd_id)
 
-        v, c = embd_mdl.encode([doc.name, req["content_with_weight"]])
+        v, c = embd_mdl.encode([doc.name, req["content_with_weight"] if not d["question_kwd"] else "\n".join(d["question_kwd"])])
         v = 0.1 * v[0] + 0.9 * v[1]
         d["q_%d_vec" % len(v)] = v.tolist()
         settings.docStoreConn.insert([d], search.index_name(tenant_id), doc.kb_id)
@@ -254,7 +255,7 @@ def create():
         return server_error_response(e)
 
 
-@manager.route('/retrieval_test', methods=['POST'])
+@manager.route('/retrieval_test', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("kb_id", "question")
 def retrieval_test():
@@ -313,7 +314,7 @@ def retrieval_test():
         return server_error_response(e)
 
 
-@manager.route('/knowledge_graph', methods=['GET'])
+@manager.route('/knowledge_graph', methods=['GET'])  # noqa: F821
 @login_required
 def knowledge_graph():
     doc_id = request.args["doc_id"]

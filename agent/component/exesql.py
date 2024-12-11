@@ -46,8 +46,10 @@ class ExeSQLParam(ComponentParamBase):
         self.check_empty(self.password, "Database password")
         self.check_positive_integer(self.top_n, "Number of records")
         if self.database == "rag_flow":
-            if self.host == "ragflow-mysql": raise ValueError("The host is not accessible.")
-            if self.password == "infini_rag_flow": raise ValueError("The host is not accessible.")
+            if self.host == "ragflow-mysql":
+                raise ValueError("The host is not accessible.")
+            if self.password == "infini_rag_flow":
+                raise ValueError("The host is not accessible.")
 
 
 class ExeSQL(ComponentBase, ABC):
@@ -62,7 +64,7 @@ class ExeSQL(ComponentBase, ABC):
         self._loop += 1
 
         ans = self.get_input()
-        ans = "".join(ans["content"]) if "content" in ans else ""
+        ans = "".join([str(a) for a in ans["content"]]) if "content" in ans else ""
         ans = re.sub(r'^.*?SELECT ', 'SELECT ', repr(ans), flags=re.IGNORECASE)
         ans = re.sub(r';.*?SELECT ', '; SELECT ', ans, flags=re.IGNORECASE)
         ans = re.sub(r';[^;]*$', r';', ans)

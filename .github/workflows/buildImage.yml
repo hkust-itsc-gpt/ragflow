@@ -7,13 +7,13 @@ on:
         description: Image tag
         required: true
       version:
-        description: Full or Slim version
+        description: Full or Slim version ('0' == Full, '1' == slim)
         type: choice
         options:
-          - 'Dockerfile'
-          - 'Dockerfile.slim'
+          - '0'
+          - '1'
         required: true
-        default: 'Dockerfile.slim'
+        default: '1'
 
 jobs:
 
@@ -57,9 +57,9 @@ jobs:
             
       - name: Download dependency
         run: |
-          if [ ${{ inputs.version }} == "Dockerfile" ]; then
+          if [ ${{ inputs.version }} == "0" ]; then
             python ./download_deps.py
-          elif [ ${{ inputs.version }} == "Dockerfile.slim" ]; then
+          elif [ ${{ inputs.version }} == "1" ]; then
             python ./customize/download_deps.py
           fi
 
@@ -72,5 +72,11 @@ jobs:
 
       - name: Build and push image to Azure ACR
         run: |
-          docker build . --file ./customize/${{ inputs.version }} --tag acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
-          docker push acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
+          if [ ${{ inputs.version }} == "0" ]; then
+            docker build --file ./customize/Dockerfile --tag acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }} .
+            docker push acraksys64gn2f5izuw.azurecr.io/ragflow:${{ inputs.tag }}
+          elif [ ${{ inputs.version }} == "1" ]; then
+            docker build --build-arg LIGHTEN=1 --file ./customize/Dockerfile --tag acraksys64gn2f5izuw.azurecr.io/ragflow:slim_${{ inputs.tag }} .
+            docker push acraksys64gn2f5izuw.azurecr.io/ragflow:slim_${{ inputs.tag }}
+          fi
+          

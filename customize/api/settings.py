@@ -150,7 +150,7 @@ def init_settings():
         RAG_FLOW_SERVICE_NAME,
         {}).get("secret_key", str(date.today()))
 
-    global AUTHENTICATION_CONF, CLIENT_AUTHENTICATION, HTTP_APP_KEY, GITHUB_OAUTH, FEISHU_OAUTH
+    global AUTHENTICATION_CONF, CLIENT_AUTHENTICATION, HTTP_APP_KEY, GITHUB_OAUTH, FEISHU_OAUTH, AZURE_OAUTH
     # authentication
     AUTHENTICATION_CONF = get_base_config("authentication", {})
 

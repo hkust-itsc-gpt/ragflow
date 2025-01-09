@@ -147,7 +147,7 @@ RUN --mount=type=cache,id=ragflow_poetry,target=/root/.cache/pypoetry,sharing=lo
 COPY web web
 COPY docs docs
 #### add custom config
-COPY ./customize/web ./web
+COPY ./customization/web ./web
 ####
 RUN --mount=type=cache,id=ragflow_npm,target=/root/.npm,sharing=locked \
     cd web && npm install --force && npm run build
@@ -185,9 +185,9 @@ COPY agent agent
 COPY graphrag graphrag
 COPY pyproject.toml poetry.toml poetry.lock ./
 #### add custom config
-COPY ./customize/api ./api
-COPY ./customize/conf ./conf
-COPY ./customize/web ./web
+COPY ./customization/api ./api
+COPY ./customization/conf ./conf
+COPY ./customization/web ./web
 ####
 
 COPY docker/service_conf.yaml.template ./conf/service_conf.yaml.template

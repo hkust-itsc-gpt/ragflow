@@ -82,7 +82,7 @@ jobs:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }} 
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_SECRET: ${{ secrets.TOSURL }}
+          AZURE_SECRET: ${{ secrets.AZURE_SECRET }}
           AZURE_TOKEN_URL: https://login.microsoftonline.com/${{ secrets.AZURE_TENANT_ID}}/oauth2/v2.0/token
           AZURE_REDIRECT_URL: https://${{ secrets.HOST }}/v1/user/azure_callback
   

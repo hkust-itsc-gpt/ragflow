@@ -117,7 +117,7 @@ RAGFLOW_IMAGE=#{RAGFLOW_IMAGE}#
 # RAGFLOW_IMAGE=registry.cn-hangzhou.aliyuncs.com/infiniflow/ragflow:nightly
 
 # The local time zone.
-TIMEZONE=Asia/Hong_Kong
+TIMEZONE=#{TIMEZONE}#
 
 # Uncomment the following line if you have limited access to huggingface.co:
 # HF_ENDPOINT=https://hf-mirror.com

@@ -42,15 +42,12 @@ spec:
           value: "3gb"
         - name: cluster.routing.allocation.disk.watermark.flood_stage
           value: "2gb"
-        - name: TZ
-          valueFrom:
-            secretKeyRef:
-              name: env-#{ENVIRON}#
-              key: TIMEZONE
         volumeMounts:
         - mountPath: /usr/share/elasticsearch/data
           name: ragflow-vol
           subPath: esdata01
+        - mountPath: /etc/localtime
+          name: tz-config
         resources:
           limits:
             memory: "4Gi"
@@ -59,6 +56,9 @@ spec:
       - name: ragflow-vol
         persistentVolumeClaim:
           claimName: #{STORAGE}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
 ---
 apiVersion: v1
 kind: Service
@@ -105,20 +105,20 @@ spec:
             secretKeyRef:
               name: env-#{ENVIRON}#
               key: MINIO_PASSWORD
-        - name: TZ
-          valueFrom:
-            secretKeyRef:
-              name: env-#{ENVIRON}#
-              key: TIMEZONE
         volumeMounts:
         - mountPath: /data
           name: ragflow-vol
           subPath: minio_data
+        - mountPath: /etc/localtime
+          name: tz-config
       restartPolicy: Always
       volumes:
       - name: ragflow-vol
         persistentVolumeClaim:
           claimName: #{STORAGE}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
 ---
 apiVersion: v1
 kind: Service
@@ -157,29 +157,28 @@ spec:
       - image: #{REDIS_IMAGE}#
         imagePullPolicy: Always
         name: redis-#{ENVIRON}#
-#        command: [ "redis-server", "--requirepass", "#{REDIS_PASSWORD}#", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru" ]
         env:
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
               name: env-#{ENVIRON}#
               key: REDIS_PASSWORD
-        - name: TZ
-          valueFrom:
-            secretKeyRef:
-              name: env-#{ENVIRON}#
-              key: TIMEZONE
         - name: VALKEY_EXTRA_FLAGS
           value: "--requirepass $(REDIS_PASSWORD) --maxmemory 128mb --maxmemory-policy allkeys-lru"
         volumeMounts:
         - mountPath: /data
           name: ragflow-vol
           subPath: redis_data
+        - mountPath: /etc/localtime
+          name: tz-config
       restartPolicy: Always
       volumes:
       - name: ragflow-vol
         persistentVolumeClaim:
           claimName: #{STORAGE}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
 ---
 apiVersion: v1
 kind: Service
@@ -219,12 +218,6 @@ spec:
         envFrom:
         - secretRef:
             name: env-#{ENVIRON}#
-        env:
-        - name: TZ
-          valueFrom:
-            secretKeyRef:
-              name: env-#{ENVIRON}#
-              key: TIMEZONE
         volumeMounts:
         - mountPath: /ragflow/logs
           name: ragflow-vol
@@ -238,6 +231,8 @@ spec:
         - mountPath: /etc/nginx/nginx.conf
           name: nginx-config
           subPath: nginx.conf
+        - mountPath: /etc/localtime
+          name: tz-config
       restartPolicy: Always
       volumes:
       - name: ragflow-vol
@@ -252,6 +247,9 @@ spec:
       - name: ragflow-config
         configMap:
           name: ragflow-config-#{ENVIRON}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
 ---
 apiVersion: v1
 kind: Service

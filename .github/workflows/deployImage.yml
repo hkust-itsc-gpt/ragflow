@@ -102,7 +102,7 @@ jobs:
           CHECKSUM: ${{ env.CHECKSUM }}
           ENVIRON: ${{ github.ref_name}}
           ELASTIC_IMAGE: ${{ secrets.ACR_REGISTRY }}/elasticsearch:${{ inputs.es }}
-          MINIO_IMAGE: ${{ secrets.ACR_REGISTRY }}/minio:${{ inputs.minio }}
+          MINIO_IMAGE: ${{ secrets.ACR_REGISTRY }}/minio/minio:${{ inputs.minio }}
           REDIS_IMAGE: ${{ secrets.ACR_REGISTRY }}/valkey/valkey:${{ inputs.redis }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           RAGFLOW_IMAGE: ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}

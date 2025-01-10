@@ -170,7 +170,7 @@ spec:
               name: env-#{ENVIRON}#
               key: TIMEZONE
         - name: VALKEY_EXTRA_FLAGS
-          value: "--requirepass $REDIS_PASSWORD --maxmemory 128mb --maxmemory-policy allkeys-lru"
+          value: "--requirepass $(REDIS_PASSWORD) --maxmemory 128mb --maxmemory-policy allkeys-lru"
         volumeMounts:
         - mountPath: /data
           name: ragflow-vol
@@ -199,7 +199,7 @@ kind: Deployment
 metadata:
   labels:
     app: ragflow-#{ENVIRON}#
-  name: ragflow--#{ENVIRON}#-deploy
+  name: ragflow-#{ENVIRON}#-deploy
 spec:
   replicas: 1
   selector:
@@ -240,6 +240,7 @@ spec:
           subPath: nginx.conf
         - mountPath: /ragflow/conf/service_conf.yaml
           name: service-config
+          readOnly: true
       restartPolicy: Always
       volumes:
       - name: ragflow-vol

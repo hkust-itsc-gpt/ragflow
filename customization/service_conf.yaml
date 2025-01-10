@@ -1,0 +1,86 @@
+ragflow:
+  host: 0.0.0.0
+  http_port: 9380
+mysql:
+  name: 'ragflow_db'
+  user: 'ragflow'
+  password: '#{MYSQL_PASSWORD}#'
+  host: '#{MYSQL_HOST}#'
+  port: 3306
+  max_connections: 100
+  stale_timeout: 30
+  ssl: {'ca': '/etc/ssl/certs/DigiCert_Global_Root_CA.pem'}
+minio:
+  user: 'rag_flow'
+  password: '#{MINIO_PASSWORD}#'
+  host: '9000'
+es:
+  hosts: 'http://es01-#{ENVIRON}#-svc:9200'
+  username: 'elastic'
+  password: '#{ELASTIC_PASSWORD}#'
+redis:
+  db: 1
+  password: '#{REDIS_PASSWORD}#' 
+  host: 'redis-#{ENVIRON}#-svc:6379'
+user_default_llm:
+  factory: 'OpenAI-API-Compatible'
+  api_key: '#{LLM_API_KEY}#'
+  base_url: '#{LLM_BASE_URL}#'
+oauth:
+  azure:
+    client_id: '#{CLIENT_ID}#'
+    client_secret: '#{CLIENT_SECRET}#'
+    token_url: '#{TOKEN_URL}#'
+    redirect_uri: '#{REDIRECT_URL}#'
+#   expired: 12/12/2026
+
+# postgres:
+#   name: '${POSTGRES_DBNAME:-rag_flow}'
+#   user: '${POSTGRES_USER:-rag_flow}'
+#   password: '${POSTGRES_PASSWORD:-infini_rag_flow}'
+#   host: '${POSTGRES_HOST:-postgres}'
+#   port: 5432
+#   max_connections: 100
+#   stale_timeout: 30
+# s3:
+#   endpoint: 'endpoint'
+#   access_key: 'access_key'
+#   secret_key: 'secret_key'
+#   region: 'region'
+# azure:
+#   auth_type: 'sas'
+#   container_url: 'container_url'
+#   sas_token: 'sas_token'
+# azure:
+#   auth_type: 'spn'
+#   account_url: 'account_url'
+#   client_id: 'client_id'
+#   secret: 'secret'
+#   tenant_id: 'tenant_id'
+#   container_name: 'container_name'
+# user_default_llm:
+#   factory: 'Tongyi-Qianwen'
+#   api_key: 'sk-xxxxxxxxxxxxx'
+#   base_url: ''
+# oauth:
+#   github:
+#     client_id: xxxxxxxxxxxxxxxxxxxxxxxxx
+#     secret_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#     url: https://github.com/login/oauth/access_token
+#   feishu:
+#     app_id: cli_xxxxxxxxxxxxxxxxxxx
+#     app_secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#     app_access_token_url: https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal
+#     user_access_token_url: https://open.feishu.cn/open-apis/authen/v1/oidc/access_token
+#     grant_type: 'authorization_code'
+# authentication:
+#   client:
+#     switch: false
+#     http_app_key:
+#     http_secret_key:
+#   site:
+#     switch: false
+# permission:
+#   switch: false
+#   component: false
+#   dataset: false

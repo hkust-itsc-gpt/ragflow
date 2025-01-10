@@ -1,0 +1,126 @@
+name: Deploy Custom Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Application image tag
+        required: true
+        default: v0.15.1
+      version:
+        description: Full or Slim version
+        type: choice
+        options:
+          - 'full'
+          - 'slim'
+        required: true
+        default: 'slim'
+      es:
+        description: Elasticsearch image tag
+        required: true
+        default: 8.11.3
+      minio:
+        description: minio image tag
+        required: true
+        default: RELEASE.2023-12-20T01-00-02Z
+      redis:
+        description: redis image tag
+        required: true
+        default: '8'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+
+    steps:
+      # checkout the repo
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: Azure login OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  
+      - name: Kubelogin with AKS
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.1.4'
+  
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          admin: false
+          cluster-name: ${{ secrets.AKS_CLUSTER }}
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          use-kubelogin: true
+  
+      - name: update yaml file with env variables
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '#{'
+          tokenSuffix: '}#'
+          files: '["./customization/env-file","./customization/service_conf.yaml"]'
+        env:
+          ENVIRON: ${{ github.ref_name}}
+          # env-file
+          STACK_VERSION: ${{ inputs.es }}
+          ELASTIC_PASSWORD: ${{ secrets.ELASTIC_PASSWORD }}
+          KIBANA_PASSWORD: ${{ secrets.KIBANA_PASSWORD }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          RAGFLOW_IMAGE: ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}
+          TIMEZONE: Asia/Hong_Kong
+          # service_conf.yaml
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }} 
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.TOSURL }}
+          TOKEN_URL: https://login.microsoftonline.com/${{ secrets.AZURE_TENANT_ID}}/oauth2/v2.0/token
+          REDIRECT_URL: https://${{ secrets.HOST }}/v1/user/azure_callback
+  
+      - name: Generate checksum
+        run: |
+          echo CHECKSUM="$(cat ./customization/env-file ./customization/service_conf.yaml | shasum | awk '{ print $1 }')" >> "$GITHUB_ENV"
+
+      - name: update deployment file
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '#{'
+          tokenSuffix: '}#'
+          files: '["./customization/deployment.yaml"]'
+        env:
+          CHECKSUM: ${{ env.CHECKSUM }}
+          ENVIRON: ${{ github.ref_name}}
+          ELASTIC_IMAGE: ${{ secrets.ACR_REGISTRY }}/elasticsearch:${{ inputs.es }}
+          MINIO_IMAGE: ${{ secrets.ACR_REGISTRY }}/minio:${{ inputs.minio }}
+          REDIS_IMAGE: ${{ secrets.ACR_REGISTRY }}/valkey/valkey:${{ inputs.redis }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          RAGFLOW_IMAGE: ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}
+          HOST: ${{ secrets.HOST }}
+          STORAGE: ${{ secrets.STORAGE }}
+          TIMEZONE: Asia/Hong_Kong
+
+      - name: Deploy
+        run: |
+          kubectl create secret generic env-${{ github.ref_name }} --from-env-file=./customization/env-file -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
+          kubectl create secret generic service-config-${{ github.ref_name }} --from-file=config=./customization/service_config.yaml -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
+          kubectl create configmap nginx-config-${{ github.ref_name }} --from-file ./docker/nginx/nginx.conf -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
+          kubectl create configmap proxy-config-${{ github.ref_name }} --from-file ./docker/nginx/proxy.conf -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
+          kubectl create configmap ragflow-config-${{ github.ref_name }} --from-file ./docker/nginx/ragflow.conf -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
+#          kubectl apply -f ./customization/deployment.yaml -n ${{ secrets.NAMESPACE }}
+
+      - name: Debug
+        run: |
+          cat ./customization/deployment.yaml
+          cat ./customization/env-file
+          cat ./customization/service_conf.yaml

@@ -7,13 +7,13 @@ on:
         description: Image tag
         required: true
       version:
-        description: Full or Slim version ('0' == Full, '1' == slim)
+        description: Full or Slim version
         type: choice
         options:
-          - '0'
-          - '1'
+          - 'full'
+          - 'slim'
         required: true
-        default: '1'
+        default: 'slim'
 
 jobs:
 
@@ -45,7 +45,7 @@ jobs:
           files: '["./customization/web/src/pages/login/index.tsx"]'
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           HOST: ${{ secrets.HOST }}
 
       - name: Set up Python
@@ -74,11 +74,10 @@ jobs:
       - name: Build and push image to Azure ACR
         run: |
           docker build --file Dockerfile.deps --tag infiniflow/ragflow_deps:latest .
-          if [ ${{ inputs.version }} == "0" ]; then
-            docker build --file ./customization/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.tag }} .
-            docker push ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.tag }}
-          elif [ ${{ inputs.version }} == "1" ]; then
-            docker build --build-arg LIGHTEN=1 --file ./customization/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_slim_${{ inputs.tag }} .
-            docker push ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_slim_${{ inputs.tag }}
+          if [ ${{ inputs.version }} == "full" ]; then
+            docker build --file ./customization/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }} .
+          else
+            docker build --build-arg LIGHTEN=1 --file ./customization/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }} .
           fi
+          docker push ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}
           

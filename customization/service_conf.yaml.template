@@ -1,38 +1,40 @@
 ragflow:
-  host: 0.0.0.0
+  host: ${RAGFLOW_HOST:-0.0.0.0}
   http_port: 9380
 mysql:
-  name: 'ragflow_db'
-  user: 'ragflow'
-  password: '#{MYSQL_PASSWORD}#'
-  host: '#{MYSQL_HOST}#'
+  name: '${MYSQL_DBNAME:-rag_flow}'
+  user: '${MYSQL_USER:-root}'
+  password: '${MYSQL_PASSWORD:-infini_rag_flow}'
+  host: '${MYSQL_HOST:-mysql}'
   port: 3306
   max_connections: 100
   stale_timeout: 30
   ssl: {'ca': '/etc/ssl/certs/DigiCert_Global_Root_CA.pem'}
 minio:
-  user: 'rag_flow'
-  password: '#{MINIO_PASSWORD}#'
-  host: '9000'
+  user: '${MINIO_USER:-rag_flow}'
+  password: '${MINIO_PASSWORD:-infini_rag_flow}'
+  host: '${MINIO_HOST:-minio}:9000'
 es:
-  hosts: 'http://es01-#{ENVIRON}#-svc:9200'
-  username: 'elastic'
-  password: '#{ELASTIC_PASSWORD}#'
+  hosts: 'http://${ES_HOST:-es01}:9200'
+  username: '${ES_USER:-elastic}'
+  password: '${ELASTIC_PASSWORD:-infini_rag_flow}'
+infinity:
+  uri: '${INFINITY_HOST:-infinity}:23817'
+  db_name: 'default_db'
 redis:
   db: 1
-  password: '#{REDIS_PASSWORD}#' 
-  host: 'redis-#{ENVIRON}#-svc:6379'
+  password: '${REDIS_PASSWORD:-infini_rag_flow}' 
+  host: '${REDIS_HOST:-redis}:6379'
 user_default_llm:
-  factory: 'OpenAI-API-Compatible'
-  api_key: '#{LLM_API_KEY}#'
-  base_url: '#{LLM_BASE_URL}#'
+  factory: '${USER_LLM:-OpenAI-API-Compatible}'
+  api_key: '${LLM_API_KEY:-xxxxxxxxxxxxxxxxxxx}'
+  base_url: '${LLM_BASE_URL:-https://xxxxxxxxxxxxxxxxxxx}'
 oauth:
   azure:
-    client_id: '#{CLIENT_ID}#'
-    client_secret: '#{CLIENT_SECRET}#'
-    token_url: '#{TOKEN_URL}#'
-    redirect_uri: '#{REDIRECT_URL}#'
-#   expired: 12/12/2026
+    client_id: '${AZURE_CLIENT_ID:-xxxxxxxxxxxxxxxxxxx}'
+    client_secret: '${AZURE_SECRET:-xxxxxxxxxxxxxxxxxxx}'
+    token_url: '${AZURE_TOKEN_URL:-https://login.microsoftonline.com/xxxxxxxxxxxxxxxxxxx/oauth2/v2.0/token}'
+    redirect_uri: '${AZURE_REDIRECT_URL:-https://xxxxxxxxxxxxxxxxxxx/v1/user/azure_callback}'
 
 # postgres:
 #   name: '${POSTGRES_DBNAME:-rag_flow}'

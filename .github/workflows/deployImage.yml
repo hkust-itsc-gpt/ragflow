@@ -67,7 +67,7 @@ jobs:
         with:
           tokenPrefix: '#{'
           tokenSuffix: '}#'
-          files: '["./customization/env-file","./customization/service_conf.yaml"]'
+          files: '["./customization/env-file"]'
         env:
           ENVIRON: ${{ github.ref_name}}
           # env-file
@@ -79,21 +79,18 @@ jobs:
           MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           RAGFLOW_IMAGE: ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}
-          TIMEZONE: Asia/Hong_Kong
-          # service_conf.yaml
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }} 
-          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.TOSURL }}
-          TOKEN_URL: https://login.microsoftonline.com/${{ secrets.AZURE_TENANT_ID}}/oauth2/v2.0/token
-          REDIRECT_URL: https://${{ secrets.HOST }}/v1/user/azure_callback
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_SECRET: ${{ secrets.TOSURL }}
+          AZURE_TOKEN_URL: https://login.microsoftonline.com/${{ secrets.AZURE_TENANT_ID}}/oauth2/v2.0/token
+          AZURE_REDIRECT_URL: https://${{ secrets.HOST }}/v1/user/azure_callback
   
       - name: Generate checksum
         run: |
-          echo CHECKSUM="$(cat ./customization/env-file ./customization/service_conf.yaml | shasum | awk '{ print $1 }')" >> "$GITHUB_ENV"
+          echo CHECKSUM="$(cat ./customization/env-file | shasum | awk '{ print $1 }')" >> "$GITHUB_ENV"
 
       - name: update deployment file
-        uses: cschleiden/replace-tokens@v1
         with:
           tokenPrefix: '#{'
           tokenSuffix: '}#'
@@ -112,7 +109,6 @@ jobs:
       - name: Deploy
         run: |
           kubectl create secret generic env-${{ github.ref_name }} --from-env-file=./customization/env-file -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
-          kubectl create secret generic service-config-${{ github.ref_name }} --from-file=service-config=./customization/service_conf.yaml -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
           kubectl create configmap nginx-config-${{ github.ref_name }} --from-file ./docker/nginx/nginx.conf -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
           kubectl create configmap proxy-config-${{ github.ref_name }} --from-file ./docker/nginx/proxy.conf -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -
           kubectl create configmap ragflow-config-${{ github.ref_name }} --from-file ./docker/nginx/ragflow.conf -o yaml --dry-run=client | kubectl apply -n ${{ secrets.NAMESPACE }} -f -

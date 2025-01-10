@@ -238,16 +238,11 @@ spec:
         - mountPath: /etc/nginx/nginx.conf
           name: nginx-config
           subPath: nginx.conf
-        - mountPath: /ragflow/conf
-          name: service-config.yaml
       restartPolicy: Always
       volumes:
       - name: ragflow-vol
         persistentVolumeClaim:
           claimName: #{STORAGE}#
-      - name: service-config.yaml
-        secret:
-          secretName: service-config-#{ENVIRON}#
       - name: nginx-config
         configMap:
           name: nginx-config-#{ENVIRON}#

@@ -15,7 +15,7 @@ COMPOSE_PROFILES=elasticsearch
 STACK_VERSION=#{STACK_VERSION}#
 
 # The hostname where the Elasticsearch service is exposed
-ES_HOST=es01-#{ENVIRON}#
+ES_HOST=es01-#{ENVIRON}#-svc
 
 # The port used to expose the Elasticsearch service to the host machine, 
 # allowing EXTERNAL access to the service running inside the Docker container.
@@ -51,9 +51,10 @@ MYSQL_DBNAME=ragflow_db
 # The port used to expose the MySQL service to the host machine, 
 # allowing EXTERNAL access to the MySQL database running inside the Docker container. 
 MYSQL_PORT=5455
+MYSQL_USER=ragflow
 
 # The hostname where the MinIO service is exposed
-MINIO_HOST=minio-#{ENVIRON}#
+MINIO_HOST=minio-#{ENVIRON}#-svc
 # The port used to expose the MinIO console interface to the host machine, 
 # allowing EXTERNAL access to the web-based console running inside the Docker container. 
 MINIO_CONSOLE_PORT=9001
@@ -68,7 +69,7 @@ MINIO_USER=rag_flow
 MINIO_PASSWORD=#{MINIO_PASSWORD}#
 
 # The hostname where the Redis service is exposed
-REDIS_HOST=redis-#{ENVIRON}#
+REDIS_HOST=redis-#{ENVIRON}#-svc
 # The port used to expose the Redis service to the host machine, 
 # allowing EXTERNAL access to the Redis service running inside the Docker container.
 REDIS_PORT=6379
@@ -116,7 +117,7 @@ RAGFLOW_IMAGE=#{RAGFLOW_IMAGE}#
 # RAGFLOW_IMAGE=registry.cn-hangzhou.aliyuncs.com/infiniflow/ragflow:nightly
 
 # The local time zone.
-TIMEZONE='#{TIMEZONE}#'
+TIMEZONE=Asia/Hong_Kong
 
 # Uncomment the following line if you have limited access to huggingface.co:
 # HF_ENDPOINT=https://hf-mirror.com
@@ -138,3 +139,13 @@ TIMEZONE='#{TIMEZONE}#'
 # - `ERROR`
 # For example, following line changes the log level of `ragflow.es_conn` to `DEBUG`:
 # LOG_LEVELS=ragflow.es_conn=DEBUG
+
+# Customization
+USER_LLM=OpenAI-API-Compatible
+LLM_API_KEY=#{LLM_API_KEY}#
+LLM_BASE_URL=#{LLM_BASE_URL}#
+
+AZURE_CLIENT_ID=#{AZURE_CLIENT_ID}#
+AZURE_SECRET=#{AZURE_SECRET}#
+AZURE_TOKEN_URL=#{AZURE_TOKEN_URL}#
+AZURE_REDIRECT_URL=#{AZURE_REDIRECT_URL}#

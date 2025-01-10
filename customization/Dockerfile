@@ -190,10 +190,10 @@ COPY ./customization/conf ./conf
 COPY ./customization/web ./web
 ####
 
-COPY docker/service_conf.yaml.template ./conf/service_conf.yaml.template
-#### use customize entrypoint.sh
-COPY customization/entrypoint.sh ./entrypoint.sh
-#COPY docker/entrypoint.sh ./entrypoint.sh
+#### use customize service_conf.yaml.template file
+COPY customization/service_conf.yaml.template ./conf/service_conf.yaml.template
+#COPY docker/service_conf.yaml.template ./conf/service_conf.yaml.template
+COPY docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 # Copy compiled web pages

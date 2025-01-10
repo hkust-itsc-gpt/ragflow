@@ -108,7 +108,6 @@ jobs:
           RAGFLOW_IMAGE: ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}
           HOST: ${{ secrets.HOST }}
           STORAGE: ${{ secrets.STORAGE }}
-          TIMEZONE: Asia/Hong_Kong
 
       - name: Debug
         run: |

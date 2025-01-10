@@ -58,9 +58,9 @@ jobs:
             
       - name: Download dependency
         run: |
-          if [ ${{ inputs.version }} == "0" ]; then
+          if [ ${{ inputs.version }} == "full" ]; then
             python ./download_deps.py
-          elif [ ${{ inputs.version }} == "1" ]; then
+          else
             python ./customization/download_deps.py
           fi
 

@@ -91,6 +91,7 @@ jobs:
           echo CHECKSUM="$(cat ./customization/env-file | shasum | awk '{ print $1 }')" >> "$GITHUB_ENV"
 
       - name: update deployment file
+        uses: cschleiden/replace-tokens@v1
         with:
           tokenPrefix: '#{'
           tokenSuffix: '}#'

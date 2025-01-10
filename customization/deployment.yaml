@@ -215,7 +215,7 @@ spec:
       containers:
       - image: #{RAGFLOW_IMAGE}#
         imagePullPolicy: Always
-        name: ragflow-server
+        name: ragflow-#{ENVIRON}#
         envFrom:
         - secretRef:
             name: env-#{ENVIRON}#

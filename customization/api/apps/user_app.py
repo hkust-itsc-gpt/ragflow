@@ -731,7 +731,7 @@ def azure_callback():
         # User isn't try to register
         try:
             try:
-                 avatar = download_img(f"https://graph.microsoft.com/v1.0/users/{user_info["oid"]}/photo/$value")
+                 avatar = download_img(f'https://graph.microsoft.com/v1.0/users/{user_info["oid"]}/photo/$value')
             except Exception as e:
                 logging.exception(e)
                 avatar = ""

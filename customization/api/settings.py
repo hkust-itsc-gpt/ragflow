@@ -128,6 +128,10 @@ def init_settings():
                 "image2text_model": "",
                 "asr_model": "",
                 "rerank_model": "BAAI/bge-reranker-v2-m3",
+            },
+            ### Add self-hosted LLama, match the model name as conf/llm_factories.json
+            "OpenAI-API-Compatible": {
+                "chat_model": "llama3-50b33a8a90b9f5d9ae",
             }
         }
 

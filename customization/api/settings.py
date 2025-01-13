@@ -132,16 +132,16 @@ def init_settings():
             ### Add self-hosted LLama, match the model name as conf/llm_factories.json
             "OpenAI-API-Compatible": {
                 "chat_model": "llama3-50b33a8a90b9f5d9ae",
+                "embedding_model": "",
+                "image2text_model": "",
+                "asr_model": "",
             }
         }
 
         if LLM_FACTORY:
             CHAT_MDL = default_llm[LLM_FACTORY]["chat_model"] + f"@{LLM_FACTORY}"
-#            ASR_MDL = default_llm[LLM_FACTORY]["asr_model"] + f"@{LLM_FACTORY}"
-#            IMAGE2TEXT_MDL = default_llm[LLM_FACTORY]["image2text_model"] + f"@{LLM_FACTORY}"
-        ### Add self-hosted LLama, match the model name as conf/llm_factories.json
-        ASR_MDL = default_llm["Tongyi-Qianwen"]["asr_model"] + "@Tongyi-Qianwen"
-        IMAGE2TEXT_MDL = default_llm["Tongyi-Qianwen"]["image2text_model"] + "@Tongyi-Qianwen"
+            ASR_MDL = default_llm[LLM_FACTORY]["asr_model"] + f"@{LLM_FACTORY}"
+            IMAGE2TEXT_MDL = default_llm[LLM_FACTORY]["image2text_model"] + f"@{LLM_FACTORY}"
         EMBEDDING_MDL = default_llm["BAAI"]["embedding_model"] + "@BAAI"
         RERANK_MDL = default_llm["BAAI"]["rerank_model"] + "@BAAI"
 

@@ -1,0 +1,320 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: es01-#{ENVIRON}#
+  name: es01-#{ENVIRON}#-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es01-#{ENVIRON}#
+  template:
+    metadata:
+      labels:
+        app: es01-#{ENVIRON}#
+    spec:
+      containers:
+      - image: #{ELASTIC_IMAGE}#
+        imagePullPolicy: Always
+        name: es01-#{ENVIRON}#
+        env:
+        - name: node.name
+          value: "es01"
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: env-#{ENVIRON}#
+              key: ELASTIC_PASSWORD
+        - name: bootstrap.memory_lock
+          value: "false"
+        - name: discovery.type
+          value: "single-node"
+        - name: xpack.security.enabled
+          value: "true"
+        - name: xpack.security.http.ssl.enabled
+          value: "false"
+        - name: xpack.security.transport.ssl.enabled
+          value: "false"
+        - name: cluster.routing.allocation.disk.watermark.low
+          value: "5gb"
+        - name: cluster.routing.allocation.disk.watermark.high
+          value: "3gb"
+        - name: cluster.routing.allocation.disk.watermark.flood_stage
+          value: "2gb"
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: ragflow-vol
+          subPath: esdata01
+        - mountPath: /etc/localtime
+          name: tz-config
+        resources:
+          limits:
+            memory: "4Gi"
+      restartPolicy: Always
+      volumes:
+      - name: ragflow-vol
+        persistentVolumeClaim:
+          claimName: #{STORAGE}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
+      nodeSelector:
+        agentpool: npuser01
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: es01-#{ENVIRON}#-svc
+spec:
+  ports:
+  - name: elasticsearch
+    port: 9200
+    protocol: TCP
+    targetPort: 9200
+  selector:
+    app: es01-#{ENVIRON}#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: minio-#{ENVIRON}#
+  name: minio-#{ENVIRON}#-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio-#{ENVIRON}#
+  template:
+    metadata:
+      labels:
+        app: minio-#{ENVIRON}#
+    spec:
+      containers:
+      - image: #{MINIO_IMAGE}#
+        imagePullPolicy: Always
+        name: minio-#{ENVIRON}#
+        command: [ "minio", "server", "/data", "--console-address", ":9001" ]
+        env:
+        - name: MINIO_ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              name: env-#{ENVIRON}#
+              key: MINIO_USER
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: env-#{ENVIRON}#
+              key: MINIO_PASSWORD
+        volumeMounts:
+        - mountPath: /data
+          name: ragflow-vol
+          subPath: minio_data
+        - mountPath: /etc/localtime
+          name: tz-config
+      restartPolicy: Always
+      volumes:
+      - name: ragflow-vol
+        persistentVolumeClaim:
+          claimName: #{STORAGE}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
+      nodeSelector:
+        agentpool: npuser01
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-#{ENVIRON}#-svc
+spec:
+  ports:
+  - name: minio
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  - name: console
+    port: 9001
+    protocol: TCP
+    targetPort: 9001
+  selector:
+    app: minio-#{ENVIRON}#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis-#{ENVIRON}#
+  name: redis-#{ENVIRON}#-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-#{ENVIRON}#
+  template:
+    metadata:
+      labels:
+        app: redis-#{ENVIRON}#
+    spec:
+      containers:
+      - image: #{REDIS_IMAGE}#
+        imagePullPolicy: Always
+        name: redis-#{ENVIRON}#
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: env-#{ENVIRON}#
+              key: REDIS_PASSWORD
+        - name: VALKEY_EXTRA_FLAGS
+          value: "--requirepass $(REDIS_PASSWORD) --maxmemory 128mb --maxmemory-policy allkeys-lru"
+        volumeMounts:
+        - mountPath: /data
+          name: ragflow-vol
+          subPath: redis_data
+        - mountPath: /etc/localtime
+          name: tz-config
+      restartPolicy: Always
+      volumes:
+      - name: ragflow-vol
+        persistentVolumeClaim:
+          claimName: #{STORAGE}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
+      nodeSelector:
+        agentpool: npuser01
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-#{ENVIRON}#-svc
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: redis-#{ENVIRON}#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ragflow-#{ENVIRON}#
+  name: ragflow-#{ENVIRON}#-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragflow-#{ENVIRON}#
+  template:
+    metadata:
+      labels:
+        app: ragflow-#{ENVIRON}#
+        azure.workload.identity/use: "true"
+      annotations:
+        checksum/config: #{CHECKSUM}#
+    spec:
+      containers:
+      - image: #{RAGFLOW_IMAGE}#
+        imagePullPolicy: Always
+        name: ragflow-#{ENVIRON}#
+        envFrom:
+        - secretRef:
+            name: env-#{ENVIRON}#
+        volumeMounts:
+        - mountPath: /ragflow/logs
+          name: ragflow-vol
+          subPath: ragflow-logs
+        - mountPath: /etc/nginx/conf.d/ragflow.conf
+          name: ragflow-config
+          subPath: ragflow.conf
+        - mountPath: /etc/nginx/proxy.conf
+          name: proxy-config
+          subPath: proxy.conf
+        - mountPath: /etc/nginx/nginx.conf
+          name: nginx-config
+          subPath: nginx.conf
+        - mountPath: /etc/localtime
+          name: tz-config
+        resources:
+          limits:
+            memory: "12Gi"
+          requests:
+            memory: "12Gi"
+      restartPolicy: Always
+      serviceAccountName: #{SERVICE_ACCOUNT_NAME}#
+      hostAliases:
+      - hostnames:
+        - #{ENDPOINT_HOST}#
+        ip: #{ENDPOINT_IP}#      
+      volumes:
+      - name: ragflow-vol
+        persistentVolumeClaim:
+          claimName: #{STORAGE}#
+      - name: nginx-config
+        configMap:
+          name: nginx-config-#{ENVIRON}#
+      - name: proxy-config
+        configMap:
+          name: proxy-config-#{ENVIRON}#
+      - name: ragflow-config
+        configMap:
+          name: ragflow-config-#{ENVIRON}#
+      - name: tz-config
+        hostPath:
+           path: /usr/share/zoneinfo/#{TIMEZONE}#
+      nodeSelector:
+        agentpool: npuser02
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragflow-#{ENVIRON}#-svc
+spec:
+  ports:
+  - name: ragflow
+    port: 9380
+    protocol: TCP
+    targetPort: 9380
+  - name: nginx
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ragflow-#{ENVIRON}#
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: hkust-wildcard-cert
+    appgw.ingress.kubernetes.io/backend-protocol: http
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+    appgw.ingress.kubernetes.io/health-probe-path: /
+    appgw.ingress.kubernetes.io/request-timeout: "300"
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/waf-policy-for-path: #{WAF_POLICY}#
+    kubernetes.io/ingress.allow-http: "true"
+    kubernetes.io/ingress.class: azure/application-gateway
+    
+  labels:
+  name: ragflow-#{ENVIRON}#-ingress
+spec:
+  rules:
+  - host: #{HOST}#
+    http:
+      paths:
+      - backend:
+          service:
+            name: ragflow-#{ENVIRON}#-svc
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - #{HOST}#

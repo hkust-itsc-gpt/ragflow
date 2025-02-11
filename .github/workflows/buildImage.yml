@@ -1,0 +1,83 @@
+name: Build Container Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Image tag
+        required: true
+      version:
+        description: Full or Slim version
+        type: choice
+        options:
+          - 'full'
+          - 'slim'
+        required: true
+        default: 'slim'
+
+jobs:
+
+  build:
+    runs-on: Ubuntu-latest
+    environment: ${{ github.ref_name }}
+
+    steps:
+      - name: Maximize build space
+        uses: AdityaGarg8/remove-unwanted-software@v4.1
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+          remove-large-packages: 'true'
+          remove-cached-tools: 'true'
+          remove-swapfile: 'true'
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: update yaml file with env variables
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '#{'
+          tokenSuffix: '}#'
+          files: '["./customization/web/src/pages/login/index.tsx"]'
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          HOST: ${{ secrets.HOST }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' 
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade huggingface_hub nltk
+            
+      - name: Download dependency
+        run: |
+          if [ ${{ inputs.version }} == "full" ]; then
+            python ./download_deps.py
+          else
+            python ./customization/download_deps.py
+          fi
+
+      - name: 'Login ACR'
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USER }}
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Build and push image to Azure ACR
+        run: |
+          docker build --file Dockerfile.deps --tag infiniflow/ragflow_deps:latest .
+          if [ ${{ inputs.version }} == "full" ]; then
+            docker build --file ./customization/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }} .
+          else
+            docker build --build-arg LIGHTEN=1 --file ./customization/Dockerfile --tag ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }} .
+          fi
+          docker push ${{ secrets.ACR_REGISTRY }}/aksapp/ragflow:${{ github.ref_name }}_${{ inputs.version }}_${{ inputs.tag }}
+          

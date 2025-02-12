@@ -72,80 +72,82 @@ def init_settings():
     LLM_BASE_URL = LLM.get("base_url")
 
     global CHAT_MDL, EMBEDDING_MDL, RERANK_MDL, ASR_MDL, IMAGE2TEXT_MDL
-    if not LIGHTEN:
-        default_llm = {
-            "Tongyi-Qianwen": {
-                "chat_model": "qwen-plus",
-                "embedding_model": "text-embedding-v2",
-                "image2text_model": "qwen-vl-max",
-                "asr_model": "paraformer-realtime-8k-v1",
-            },
-            "OpenAI": {
-                "chat_model": "gpt-3.5-turbo",
-                "embedding_model": "text-embedding-ada-002",
-                "image2text_model": "gpt-4-vision-preview",
-                "asr_model": "whisper-1",
-            },
-            "Azure-OpenAI": {
-                "chat_model": "gpt-35-turbo",
-                "embedding_model": "text-embedding-ada-002",
-                "image2text_model": "gpt-4-vision-preview",
-                "asr_model": "whisper-1",
-            },
-            "ZHIPU-AI": {
-                "chat_model": "glm-3-turbo",
-                "embedding_model": "embedding-2",
-                "image2text_model": "glm-4v",
-                "asr_model": "",
-            },
-            "Ollama": {
-                "chat_model": "qwen-14B-chat",
-                "embedding_model": "flag-embedding",
-                "image2text_model": "",
-                "asr_model": "",
-            },
-            "Moonshot": {
-                "chat_model": "moonshot-v1-8k",
-                "embedding_model": "",
-                "image2text_model": "",
-                "asr_model": "",
-            },
-            "DeepSeek": {
-                "chat_model": "deepseek-chat",
-                "embedding_model": "",
-                "image2text_model": "",
-                "asr_model": "",
-            },
-            "VolcEngine": {
-                "chat_model": "",
-                "embedding_model": "",
-                "image2text_model": "",
-                "asr_model": "",
-            },
-            "BAAI": {
-                "chat_model": "",
-                "embedding_model": "BAAI/bge-large-zh-v1.5",
-                "image2text_model": "",
-                "asr_model": "",
-                "rerank_model": "BAAI/bge-reranker-v2-m3",
-            },
-            "OpenAI-API-Compatible": {
-                "chat_model": "llama33-70b",
-                "embedding_model": "bge-m3",
-                "image2text_model": "",
-                "asr_model": "",
-                "rerank_model": "bge-reranker-v2-m3",
-            }
-        }
 
-        if LLM_FACTORY:
-            CHAT_MDL = default_llm[LLM_FACTORY]["chat_model"] + f"@{LLM_FACTORY}"
-            ASR_MDL = default_llm[LLM_FACTORY]["asr_model"] + f"@{LLM_FACTORY}"
-            IMAGE2TEXT_MDL = default_llm[LLM_FACTORY]["image2text_model"] + f"@{LLM_FACTORY}"
-            EMBEDDING_MDL = default_llm[LLM_FACTORY]["embedding_model"] + f"@{LLM_FACTORY}"
-            RERANK_MDL = default_llm[LLM_FACTORY]["rerank_model"] + f"@{LLM_FACTORY}"
-#        EMBEDDING_MDL = default_llm["BAAI"]["embedding_model"] + "@BAAI"
-#        RERANK_MDL = default_llm["BAAI"]["rerank_model"] + "@BAAI"
+    default_llm = {
+        "Tongyi-Qianwen": {
+            "chat_model": "qwen-plus",
+            "embedding_model": "text-embedding-v2",
+            "image2text_model": "qwen-vl-max",
+            "asr_model": "paraformer-realtime-8k-v1",
+        },
+        "OpenAI": {
+            "chat_model": "gpt-3.5-turbo",
+            "embedding_model": "text-embedding-ada-002",
+            "image2text_model": "gpt-4-vision-preview",
+            "asr_model": "whisper-1",
+        },
+        "Azure-OpenAI": {
+            "chat_model": "gpt-35-turbo",
+            "embedding_model": "text-embedding-ada-002",
+            "image2text_model": "gpt-4-vision-preview",
+            "asr_model": "whisper-1",
+        },
+        "ZHIPU-AI": {
+            "chat_model": "glm-3-turbo",
+            "embedding_model": "embedding-2",
+            "image2text_model": "glm-4v",
+            "asr_model": "",
+        },
+        "Ollama": {
+            "chat_model": "qwen-14B-chat",
+            "embedding_model": "flag-embedding",
+            "image2text_model": "",
+            "asr_model": "",
+        },
+        "Moonshot": {
+            "chat_model": "moonshot-v1-8k",
+            "embedding_model": "",
+            "image2text_model": "",
+            "asr_model": "",
+        },
+        "DeepSeek": {
+            "chat_model": "deepseek-chat",
+            "embedding_model": "",
+            "image2text_model": "",
+            "asr_model": "",
+        },
+        "VolcEngine": {
+            "chat_model": "",
+            "embedding_model": "",
+            "image2text_model": "",
+            "asr_model": "",
+        },
+        "BAAI": {
+            "chat_model": "",
+            "embedding_model": "BAAI/bge-large-zh-v1.5",
+            "image2text_model": "",
+            "asr_model": "",
+            "rerank_model": "BAAI/bge-reranker-v2-m3",
+        },
+        "OpenAI-API-Compatible": {
+            "chat_model": "llama33-70b",
+            "embedding_model": "bge-m3",
+            "image2text_model": "",
+            "asr_model": "",
+            "rerank_model": "bge-reranker-v2-m3",
+        }
+    }
+
+    if not LIGHTEN:
+        EMBEDDING_MDL = default_llm["BAAI"]["embedding_model"] + "@BAAI"
+        RERANK_MDL = default_llm["BAAI"]["rerank_model"] + "@BAAI"
+
+    if LLM_FACTORY:
+        CHAT_MDL = default_llm[LLM_FACTORY]["chat_model"] + f"@{LLM_FACTORY}"
+        ASR_MDL = default_llm[LLM_FACTORY]["asr_model"] + f"@{LLM_FACTORY}"
+        IMAGE2TEXT_MDL = default_llm[LLM_FACTORY]["image2text_model"] + f"@{LLM_FACTORY}"
+        EMBEDDING_MDL = default_llm[LLM_FACTORY]["embedding_model"] + f"@{LLM_FACTORY}"
+        RERANK_MDL = default_llm[LLM_FACTORY]["rerank_model"] + f"@{LLM_FACTORY}"
 
     global API_KEY, PARSERS, HOST_IP, HOST_PORT, SECRET_KEY
     API_KEY = LLM.get("api_key", "")

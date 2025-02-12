@@ -130,10 +130,10 @@ def init_settings():
             "rerank_model": "BAAI/bge-reranker-v2-m3",
         },
         "OpenAI-API-Compatible": {
-            "chat_model": "llama33-70b",
+            "chat_model": "llama",
             "embedding_model": "bge-m3",
-            "image2text_model": "",
-            "asr_model": "",
+            "image2text_model": "llama-vision",
+            "asr_model": "qwen2-audio",
             "rerank_model": "bge-reranker-v2-m3",
         }
     }

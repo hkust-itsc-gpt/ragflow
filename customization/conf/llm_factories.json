@@ -261,15 +261,27 @@
             "status": "1",
             "llm": [
                 {
-                    "llm_name": "llama33-70b",
+                    "llm_name": "llama",
                     "tags": "LLM,CHAT,128K",
                     "max_tokens": 128000,
                     "model_type": "chat"
                 },
                 {
+                    "llm_name": "llama-vision",
+                    "tags": "LLM,CHAT,IMAGE2TEXT,128K",
+                    "max_tokens": 128000,
+                    "model_type": "image2text"
+                },
+                {
                     "llm_name": "e5-mistral",
-                    "tags": "TEXT EMBEDDING,8K",
-                    "max_tokens": 8192,
+                    "tags": "TEXT EMBEDDING,4K",
+                    "max_tokens": 4096,
+                    "model_type": "embedding"
+                },
+                {
+                    "llm_name": "multilingual-e5-large",
+                    "tags": "TEXT EMBEDDING",
+                    "max_tokens": 1024,
                     "model_type": "embedding"
                 },
                 {
@@ -283,6 +295,12 @@
                     "tags": "RE-RANK",
                     "max_tokens": 1024,
                     "model_type": "rerank"
+                },
+                {
+                    "llm_name": "qwen2-audio",
+                    "tags": "SPEECH2TEXT",
+                    "max_tokens": 32768,
+                    "model_type": "speech2text"
                 }
             ]
         },

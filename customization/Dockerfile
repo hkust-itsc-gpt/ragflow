@@ -65,7 +65,7 @@ RUN if [ "$NEED_MIRROR" == "1" ]; then \
         pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
         pip3 config set global.trusted-host pypi.tuna.tsinghua.edu.cn; \
     fi; \
-    pipx install poetry; \
+    pipx install poetry==2.0.1; \
     if [ "$NEED_MIRROR" == "1" ]; then \
         pipx inject poetry poetry-plugin-pypi-mirror; \
     fi

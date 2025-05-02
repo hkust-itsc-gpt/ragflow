@@ -3,7 +3,7 @@ FROM ubuntu:22.04 AS base
 USER root
 SHELL ["/bin/bash", "-c"]
 
-ARG NEED_MIRROR=1
+ARG NEED_MIRROR=0
 ARG LIGHTEN=0
 ENV LIGHTEN=${LIGHTEN}
 
@@ -132,7 +132,7 @@ USER root
 WORKDIR /ragflow
 
 # install dependencies from poetry.lock file
-COPY pyproject.toml poetry.toml poetry.lock ./
+COPY pyproject.toml poetry.toml customization/poetry.lock ./
 
 RUN --mount=type=cache,id=ragflow_poetry,target=/root/.cache/pypoetry,sharing=locked \
     if [ "$NEED_MIRROR" == "1" ]; then \

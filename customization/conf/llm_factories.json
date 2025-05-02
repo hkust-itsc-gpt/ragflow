@@ -301,6 +301,17 @@
                     "tags": "SPEECH2TEXT",
                     "max_tokens": 32768,
                     "model_type": "speech2text"
+                },
+                {
+                    "llm_name": "HKGAI-V1",
+                    "tags": "LLM,CHAT,64K",
+                    "max_tokens": 64000,
+                    "model_type": "chat"
+                },                {
+                    "llm_name": "HKGAI-V1-Thinking",
+                    "tags": "LLM,CHAT,64K",
+                    "max_tokens": 64000,
+                    "model_type": "chat"
                 }
             ]
         },

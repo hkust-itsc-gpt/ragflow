@@ -116,6 +116,8 @@ class Docx(DocxParser):
                         if c.text == r.cells[j].text:
                             span += 1
                             i = j
+                        else:
+                            break
                     i += 1
                     html += f"<td>{c.text}</td>" if span == 1 else f"<td colspan='{span}'>{c.text}</td>"
                 html += "</tr>"
@@ -238,7 +240,7 @@ def chunk(filename, binary=None, from_page=0, to_page=100000,
                                       callback=callback)
         res = tokenize_table(tables, doc, is_english)
 
-    elif re.search(r"\.xlsx?$", filename, re.IGNORECASE):
+    elif re.search(r"\.(csv|xlsx?)$", filename, re.IGNORECASE):
         callback(0.1, "Start to parse.")
         excel_parser = ExcelParser()
         if parser_config.get("html4excel"):
@@ -305,9 +307,7 @@ def chunk(filename, binary=None, from_page=0, to_page=100000,
 if __name__ == "__main__":
     import sys
 
-
     def dummy(prog=None, msg=""):
         pass
-
 
     chunk(sys.argv[1], from_page=0, to_page=10, callback=dummy)

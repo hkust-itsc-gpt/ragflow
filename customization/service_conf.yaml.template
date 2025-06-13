@@ -29,6 +29,12 @@ user_default_llm:
   factory: '${USER_LLM:-OpenAI-API-Compatible}'
   api_key: '${LLM_API_KEY:-xxxxxxxxxxxxxxxxxxx}'
   base_url: '${LLM_BASE_URL:-https://xxxxxxxxxxxxxxxxxxx}'
+  default_models:
+    chat_model: 'llama'
+    embedding_model: 'bge-m3'
+    rerank_model: 'bge-reranker-v2-m3'
+    asr_model: 'qwen2-audio'
+    image2text_model: 'llama-vision'
 oauth:
   azure:
     client_id: '${CLIENT_ID:-xxxxxxxxxxxxxxxxxxx}'
@@ -48,6 +54,13 @@ oauth:
 #   access_key: 'access_key'
 #   secret_key: 'secret_key'
 #   region: 'region'
+# oss:
+#   access_key: '${ACCESS_KEY}'
+#   secret_key: '${SECRET_KEY}'
+#   endpoint_url: '${ENDPOINT}'
+#   region: '${REGION}'
+#   bucket: '${BUCKET}'
+#   prefix_path: '${OSS_PREFIX_PATH}'
 # azure:
 #   auth_type: 'sas'
 #   container_url: 'container_url'
@@ -63,6 +76,12 @@ oauth:
 #   factory: 'Tongyi-Qianwen'
 #   api_key: 'sk-xxxxxxxxxxxxx'
 #   base_url: ''
+#   default_models:
+#     chat_model: 'qwen-plus'
+#     embedding_model: 'BAAI/bge-large-zh-v1.5@BAAI'
+#     rerank_model: ''
+#     asr_model: ''
+#     image2text_model: ''
 # oauth:
 #   github:
 #     client_id: xxxxxxxxxxxxxxxxxxxxxxxxx

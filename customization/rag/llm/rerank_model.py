@@ -194,6 +194,8 @@ class YoudaoRerank(DefaultRerank):
                                 "maidalun1020", "InfiniFlow"))
 
         self._model = YoudaoRerank._model
+        self._dynamic_batch_size = 8
+        self._min_batch_size = 1
 
     def similarity(self, query: str, texts: list):
         pairs = [(query, truncate(t, self._model.max_length)) for t in texts]
@@ -206,7 +208,7 @@ class YoudaoRerank(DefaultRerank):
 
 
 class XInferenceRerank(Base):
-    def __init__(self, key="xxxxxxx", model_name="", base_url=""):
+    def __init__(self, key="x", model_name="", base_url=""):
         if base_url.find("/v1") == -1:
             base_url = urljoin(base_url, "/v1/rerank")
         if base_url.find("/rerank") == -1:
@@ -215,9 +217,10 @@ class XInferenceRerank(Base):
         self.base_url = base_url
         self.headers = {
             "Content-Type": "application/json",
-            "accept": "application/json",
-            "Authorization": f"Bearer {key}"
+            "accept": "application/json"
         }
+        if key and key != "x":
+            self.headers["Authorization"] = f"Bearer {key}"
 
     def similarity(self, query: str, texts: list):
         if len(texts) == 0:
@@ -336,7 +339,8 @@ class LmStudioRerank(Base):
 class OpenAI_APIRerank(Base):
     def __init__(self, key, model_name, base_url):
         if base_url.find("/rerank") == -1:
-#            self.base_url = urljoin(base_url, "/rerank")
+            # self.base_url = urljoin(base_url, "/rerank")
+            # add "v1" to the rerank endpoint, add "api-hey" to the headers
             self.base_url = os.path.join(base_url, "v1/rerank")
         else:
             self.base_url = base_url
@@ -384,7 +388,7 @@ class CoHereRerank(Base):
         from cohere import Client
 
         self.client = Client(api_key=key, base_url=base_url)
-        self.model_name = model_name
+        self.model_name = model_name.split("___")[0]
 
     def similarity(self, query: str, texts: list):
         token_count = num_tokens_from_string(query) + sum(
@@ -539,7 +543,7 @@ class HuggingfaceRerank(DefaultRerank):
         return np.array(scores)
 
     def __init__(self, key, model_name="BAAI/bge-reranker-v2-m3", base_url="http://127.0.0.1"):
-        self.model_name = model_name
+        self.model_name = model_name.split("___")[0]
         self.base_url = base_url
 
     def similarity(self, query: str, texts: list) -> tuple[np.ndarray, int]:
@@ -600,3 +604,4 @@ class GPUStackRerank(Base):
         except httpx.HTTPStatusError as e:
             raise ValueError(
                 f"Error calling GPUStackRerank model {self.model_name}: {e.response.status_code} - {e.response.text}")
+

@@ -1,4 +1,5 @@
 import { useLogin, useRegister } from '@/hooks/login-hooks';
+import { useSystemConfig } from '@/hooks/system-hooks';
 import { rsaPsw } from '@/utils';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { useEffect, useState } from 'react';
@@ -16,8 +17,13 @@ const Login = () => {
   const { register, loading: registerLoading } = useRegister();
   const { t } = useTranslation('translation', { keyPrefix: 'login' });
   const loading = signLoading || registerLoading;
+  const { config } = useSystemConfig();
+  const registerEnabled = config?.registerEnabled !== 0;
 
   const changeTitle = () => {
+    if (title === 'login' && !registerEnabled) {
+      return;
+    }
     setTitle((title) => (title === 'login' ? 'register' : 'login'));
   };
   const [form] = Form.useForm();
@@ -125,7 +131,7 @@ const Login = () => {
               </Form.Item>
             )}
             <div>
-              {title === 'login' && (
+              {title === 'login' && registerEnabled && (
                 <div>
                   {t('signInTip')}
                   <Button type="link" onClick={changeTitle}>
@@ -152,21 +158,21 @@ const Login = () => {
               {title === 'login' ? t('login') : t('continue')}
             </Button> */}
 
-          {/* Add Azure Button */}
-          <Button
-              block
-              size="large"
-              onClick={toAzure}
-              style={{ marginTop: 15 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon
-                icon="local:azure"
-                style={{ verticalAlign: 'middle', marginRight: 5 }}
-              />
-              Sign in with Azure
-            </div>
-          </Button>
+            {/* Add Azure Button */}
+            <Button
+                block
+                size="large"
+                onClick={toAzure}
+                style={{ marginTop: 15 }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon
+                  icon="local:azure"
+                  style={{ verticalAlign: 'middle', marginRight: 5 }}
+                />
+                Sign in with Azure
+              </div>
+            </Button>
 
             {title === 'login' && (
               <>

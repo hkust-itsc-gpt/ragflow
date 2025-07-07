@@ -1441,8 +1441,13 @@ class OpenAI_APIChat(Base):
         if base_url.split("/")[-1] != "v1":
             base_url = os.path.join(base_url, "v1")
         custom_headers = {"api-key": key}
-        self.client = OpenAI(api_key=key, base_url=base_url, default_headers = custom_headers)
+        timeout = int(os.environ.get("LM_TIMEOUT_SECONDS", 600))
+        self.client = OpenAI(api_key=key, base_url=base_url, timeout=timeout, default_headers=custom_headers)
         self.model_name = model_name.split("___")[0]
+        # Configure retry parameters
+        self.max_retries = int(os.environ.get("LLM_MAX_RETRIES", 5))
+        self.base_delay = float(os.environ.get("LLM_BASE_DELAY", 2.0))
+        self.is_tools = False
 
 
 class PPIOChat(Base):

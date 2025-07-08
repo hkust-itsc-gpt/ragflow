@@ -9,7 +9,7 @@ mysql:
   port: 3306
   max_connections: 100
   stale_timeout: 30
-  ssl: {'ca': '/etc/ssl/certs/DigiCert_Global_Root_CA.pem'}
+  ssl: {'capath': '/etc/ssl/certs/'}
 minio:
   user: '${MINIO_USER:-rag_flow}'
   password: '${MINIO_PASSWORD:-infini_rag_flow}'
